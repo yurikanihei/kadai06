@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Map&amp;Geolocation</title>
+  <style>html,body{height:100%;}body{padding:0;margin:0;}h1{padding:0;margin:0;font-size:50%;}div{float:left;}</style>
+</head>
+
+<body>
+  <!-- MAP[START] -->
+<div id="view"></div>
+<div id="myMap" style='width:45%;height:99%;float:left;'></div>
+<!-- MAP[END] -->
+<!--Directions[START]-->
+<div>
+    From:<input type="text" id="from" value="御茶ノ水">
+    To:<input id="to" value="表参道">
+    <select id="mode">
+        <option value="walking">walking</option>
+        <option value="driving">driving</option>
+    </select>
+    <input type="button" id="search" value="ルート検索">
+</div>
+<div id="direction"></div>
+<!-- Directions[END] -->
+
+
+  <!-- jQuery&GoogleMapsAPI -->
+  <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+  <script src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=Ap50jAy3OYXOkfi6xy1IABMxnbKmdWEnjbnY2fHIfQxklOTOjBb_liLbagV2v4ms'
+    async defer></script>
+  <script src="js/BmapQuery.js"></script>
+  <script>
+    //****************************************
+    //最初に実行する関数
+    //****************************************
+    function GetMap(){
+      navigator.geolocation.getCurrentPosition(mapsInit,mapsError,set);
+
+      document.getElementById("search").onclick = function () {
+        //Get From,To
+        const from  = document.getElementById("from").value;  //StartPoint
+        const to    = document.getElementById("to").value;    //EndPoint
+        const mode  = document.getElementById("mode").value;  //RouteMode[walking,driving]
+        //経由地あり
+        const array = ["新宿", "恵比寿"];                       //Waypoints...
+        map.direction("#direction", mode, from, to, array);  //Direction Methed
+
+        //経由地なし
+        //map.direction("#direction", from , to, []);
+
+
+    };
+
+    }
+
+
+    //****************************************
+    //成功関数
+    //****************************************
+    let map;
+
+    function mapsInit(position) {
+    //lat=緯度、lon=経度 を取得
+    const lat = position.coords.latitude;
+    const lon = position.coords.longitude;
+
+    //Map表示
+    map = new Bmap("#myMap");
+    map.startMap(lat, lon, "load", 25); //The place is Bellevue.
+    //Pinを追加
+    let pin = map.pin(lat, lon, "#ff0000");
+    //Infoboxを追加
+
+    map.onPin(pin, "click", function(){
+      map.infoboxHtml(lat, lon, '<img src="https://stevensegallery.com/200/300"  width="50px" height="70"></img>');
+    });
+
+   
+
+    };
+
+    
+
+
+
+
+
+    //****************************************
+    //失敗関数
+    //****************************************
+    function mapsError(error) {
+    let e = "";
+    if (error.code == 1) { //1＝位置情報取得が許可されてない（ブラウザの設定）
+    e = "位置情報が許可されてません";
+    }
+    if (error.code == 2) { //2＝現在地を特定できない
+    e = "現在位置を特定できません";
+    }
+    if (error.code == 3) { //3＝位置情報を取得する前にタイムアウトになった場合
+    e = "位置情報を取得する前にタイムアウトになりました";
+    }
+    alert("エラー：" + e);
+  };
+
+
+
+
+    
+
+    //****************************************
+    //オプション設定
+    //****************************************
+    const set = {
+      enableHighAccuracy: true, //より高精度な位置を求める
+      maximumAge: 20000, //最後の現在地情報取得が20秒以内であればその情報を再利用する設定
+      timeout: 10000 //10秒以内に現在地情報を取得できなければ、処理を終了
+    };
+  </script>
+</body>
+
+</html>
